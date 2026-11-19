@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FaHaM</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--app-bg:#0b1020;--file-a-color:#b9d2ff;--file-b-color:#9fe3cb;--pane-bg:#0d1423;--pane-fg:#d9e3f1;--selection-bg:#202d46;--selection-fg:#e7eef9;--panel:#111a2c;--line:#263249;--muted:#9aabc3;--text:#e7eef9;--accent:#7c9cff;--red:#ff6d7a;--green:#48d7a0;--yellow:#ffd36a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#182440,var(--app-bg) 55%);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+header{max-width:1400px;margin:auto;padding:38px 28px 20px}.brand{display:flex;align-items:center;gap:22px}.brand-mark{display:block;width:94px;height:132px;flex:none;object-fit:contain;object-position:center;border-radius:14px;border:1px solid #d8ddbd;background:#dce2bf;box-shadow:0 8px 24px #0005,0 0 0 5px #ffffff0a}.brand-mark[hidden]{display:none!important}.brand-copy h1{font-size:clamp(26px,4vw,38px);letter-spacing:-.04em;margin:0 0 6px}.sub{color:var(--muted);margin:0}.wrap{max-width:1400px;margin:auto;padding:8px 28px 38px}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px;background:#111a2cdd;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px #0003}.pick{display:flex;gap:10px;align-items:center;flex:1 1 250px;min-width:220px}.mode{display:flex;gap:8px;align-items:center;color:var(--muted);white-space:nowrap}.mode select{background:#202d46;color:var(--text);border:1px solid #34425d;border-radius:9px;padding:9px 30px 9px 11px;font:inherit}.pick label{font-weight:650;white-space:nowrap}.file{min-width:0;flex:1;color:var(--muted);font-size:12px}.file::file-selector-button,.btn{background:#202d46;color:var(--text);border:1px solid #34425d;border-radius:9px;padding:9px 12px;cursor:pointer;font:inherit}.file::file-selector-button{margin-right:8px}.btn.primary{background:var(--accent);color:#081126;border:0;font-weight:750}.btn:hover,.file::file-selector-button:hover{filter:brightness(1.15)}.status{color:var(--muted);margin-left:auto;font-size:12px}.summary{display:flex;gap:16px;align-items:center;margin:18px 2px 10px;color:var(--muted);font-size:13px}.pill{border-radius:99px;padding:4px 9px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:filter .15s,transform .15s}.pill:hover{filter:brightness(1.18);transform:translateY(-1px)}.pill[aria-pressed="true"]{border-color:currentColor;box-shadow:0 0 0 2px #ffffff18}.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.pill.add{background:#124a3b;color:#73edba}.pill.del{background:#512b38;color:#ff9ba4}.legend{margin-left:auto;display:flex;gap:13px}.key{display:flex;gap:6px;align-items:center}.dot{width:9px;height:9px;border-radius:3px}.dot.a{background:#1d604d}.dot.d{background:#733843}.dot.c{background:#755921}
+.diff{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1423;min-height:220px}.heads{display:grid;grid-template-columns:1fr 1fr;background:#131e31;border-bottom:1px solid var(--line)}.head{padding:12px 15px;color:#c3d0e2;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.head+ .head{border-left:1px solid var(--line)}.empty{padding:54px 20px;text-align:center;color:var(--muted)}.empty strong{display:block;color:#dbe7f8;font-size:16px;margin-bottom:5px}.rows{font:12.5px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:auto;max-height:66vh;scrollbar-gutter:stable}.row{display:grid;grid-template-columns:1fr 1fr;min-width:650px}.row[hidden]{display:none!important}.cell{display:flex;min-width:0;border-bottom:1px solid #172235}.cell+.cell{border-left:1px solid var(--line)}.ln{color:#62728d;text-align:right;user-select:none;padding:2px 10px 2px 6px;min-width:52px;border-right:1px solid #202d42}.code{padding:2px 10px;white-space:pre;overflow:auto;flex:1;color:#d9e3f1}.row.add .cell:nth-child(2){background:#145640;box-shadow:inset 4px 0 #48d7a0}.row.del .cell:nth-child(1){background:#562b37;box-shadow:inset 4px 0 #ff6d7a}.row.change .cell{background:#51401d;box-shadow:inset 4px 0 #ffd36a}.row.add .cell:nth-child(2) .code,.row.del .cell:nth-child(1) .code,.row.change .code{color:#fff;font-weight:650}.row.blank .code{min-height:24px}.row.add .cell:nth-child(1),.row.del .cell:nth-child(2){background:#0d1423;box-shadow:none}.foot{color:#71819b;font-size:11px;text-align:center;margin-top:12px}.drop{outline:2px dashed var(--accent);outline-offset:-5px}.multi-results{display:grid;gap:18px;margin-top:18px}.multi-pair{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1423}.multi-pair .pair-summary{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#111a2c;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px}.multi-pair .pair-counts{display:flex;gap:8px;flex-wrap:wrap}.multi-pair .heads{grid-template-columns:1fr 1fr}.multi-pair .rows{max-height:58vh}
+@media(max-width:700px){.brand{gap:14px}.brand-mark{width:72px;height:104px}header{padding:28px 16px 14px}.wrap{padding:8px 12px 28px}.toolbar{padding:12px}.summary{flex-wrap:wrap}.legend{width:100%;margin:0}.status{margin-left:0;width:100%}}
+.invocation{position:relative;isolation:isolate;overflow:hidden;text-align:center;padding:9px 14px 8px;border-top:1px solid #d8bb65;border-bottom:1px solid #a88740;background:linear-gradient(110deg,#111827,#222b37 48%,#111827);box-shadow:0 0 22px #edc95b28,0 6px 25px #0006}.invocation:before{content:"";position:absolute;z-index:-1;inset:1px;background:radial-gradient(ellipse at 50% 0%,#ffe88c48,transparent 74%),radial-gradient(ellipse at 50% 100%,#c9933450,transparent 65%)}.invocation:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(112deg,transparent 25%,#fff0 42%,#fff2 49%,#fff0 56%,transparent 72%);transform:translateX(-110%);animation:bannerShimmer 5.5s ease-in-out infinite}.invocation-ar{color:#f2dda0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(20px,2.6vw,27px);line-height:1.35;letter-spacing:.015em;text-shadow:0 0 7px #ffe889b0,0 0 18px #f3c44e85,0 2px 12px #e5ad3560}.invocation-en{margin-top:2px;color:#e0d2a9;font-size:10px;letter-spacing:.11em;text-transform:uppercase}.spark{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff4c4;box-shadow:0 0 8px 3px #ffe58a,0 0 20px 8px #ffc53e;opacity:0;animation:sparkBurst 4.2s ease-in-out infinite}.spark.s1{left:17%;bottom:18%;animation-delay:.3s}.spark.s2{left:31%;top:20%;animation-delay:1.6s}.spark.s3{right:23%;bottom:24%;animation-delay:2.2s}.spark.s4{right:12%;top:27%;animation-delay:.9s}.spark.s5{left:7%;top:54%;width:3px;height:3px;animation-delay:2.8s}@keyframes bannerShimmer{0%,58%{transform:translateX(-110%)}82%,100%{transform:translateX(110%)}}.spark:before,.spark:after{content:"";position:absolute;left:50%;top:50%;background:#fff3bb;border-radius:99px;transform:translate(-50%,-50%);box-shadow:0 0 8px #ffe376}.spark:before{width:18px;height:1px}.spark:after{width:1px;height:18px}@keyframes sparkBurst{0%,68%,100%{opacity:0;transform:scale(.25)}74%{opacity:1;transform:scale(1.1)}80%{opacity:.75;transform:scale(.65)}87%{opacity:0;transform:scale(1.45)}}@media(prefers-reduced-motion:reduce){.invocation:after,.spark{animation:none}.spark{opacity:.45}}.topbar{display:flex;align-items:center;justify-content:flex-start;gap:16px}.brand{cursor:pointer;user-select:none}.setup-dialog{width:min(560px,calc(100vw - 28px));max-height:90vh;overflow:auto;padding:0;border:1px solid #394967;border-radius:18px;background:#111a2c;color:var(--text);box-shadow:0 24px 80px #0009}.setup-dialog::backdrop{background:#050914bb;backdrop-filter:blur(4px)}.setup-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}.setup-head h2{margin:0;font-size:20px}.setup-body{padding:18px 20px;display:grid;gap:15px}.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.setup-field{display:grid;gap:6px;color:#c5d1e2;font-size:13px}.setup-field input[type=text],.setup-field textarea{width:100%;background:#0b1220;color:var(--text);border:1px solid #34425d;border-radius:8px;padding:9px 10px;font:inherit}.setup-field textarea{min-height:62px;resize:vertical}.setup-field input[type=color]{width:100%;height:40px;padding:3px;background:#0b1220;border:1px solid #34425d;border-radius:8px}.setup-check{display:flex;gap:9px;align-items:center;color:#d5dfed;font-size:13px}.setup-check input{accent-color:var(--accent);width:16px;height:16px}.setup-actions{display:flex;justify-content:space-between;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}.setup-actions div{display:flex;gap:8px}.setup-note{font-size:11px;color:var(--muted);margin:0}@media(max-width:700px){.topbar{align-items:flex-start}.topbar .brand{gap:12px}.topbar .brand-mark{width:60px;height:88px}.setup-row{grid-template-columns:1fr 1fr}.setup-head,.setup-body,.setup-actions{padding-left:15px;padding-right:15px}}.activation-box{border:1px solid #34425d;border-radius:12px;background:#0d1524;padding:14px;display:grid;gap:9px}.activation-box h3{font-size:15px;margin:0;color:#e5edf9}.activation-key{font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all;background:#080e19;border:1px solid #25334a;border-radius:8px;padding:10px;color:#9df0cb;min-height:40px}.activation-meta{font-size:11px;color:var(--muted)}.activation-actions{display:flex;gap:8px;flex-wrap:wrap}.activation-gate{position:fixed;z-index:99999;inset:0;display:grid;place-items:center;padding:18px;background:#080d18ed;backdrop-filter:blur(12px)}.activation-gate[hidden]{display:none!important}.activation-card{width:min(440px,100%);display:grid;gap:12px;background:#111a2c;border:1px solid #394967;border-radius:18px;padding:24px;box-shadow:0 24px 90px #000a}.gate-brand{font-size:12px;color:#a9bcde;letter-spacing:.13em;text-transform:uppercase}.activation-card h2{margin:0;font-size:25px}.activation-card p,.gate-foot{margin:0;color:#9aabc3;font-size:13px}.activation-card label{font-size:13px;color:#cbd7e8}.activation-card input,.activation-card textarea{width:100%;background:#080e19;border:1px solid #34425d;border-radius:9px;padding:12px;color:#9df0cb;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}.activation-card textarea{min-height:88px;resize:vertical}.device-code{word-break:break-all;background:#080e19;border:1px solid #34425d;border-radius:9px;padding:11px;color:#9df0cb;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}.activation-card .btn{width:100%}.gate-status{min-height:20px;color:#ffd36a;font-size:13px}.gate-foot{font-size:11px;border-top:1px solid #263249;padding-top:10px}.activation-actions a.btn{text-decoration:none;text-align:center}.setup-section-title{font-size:14px;margin:5px 0 -8px;color:#dce7f5}.pick label[for="leftFile"]{color:var(--file-a-color)}.pick label[for="rightFile"]{color:var(--file-b-color)}.file{background:var(--selection-bg);color:var(--selection-fg);border-radius:9px;padding:4px}.mode select{background:var(--selection-bg)!important;color:var(--selection-fg)!important}.file::file-selector-button{background:var(--selection-bg)!important;color:var(--selection-fg)!important}.code{background:var(--pane-bg);color:var(--pane-fg)}.row.add .cell:nth-child(2) .code{background:#145640}.row.del .cell:nth-child(1) .code{background:#562b37}.row.change .code{background:#51401d}.diff-search{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 10px;padding:12px 14px;background:#111a2cdd;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:13px}.diff-search[hidden]{display:none!important}.diff-search input{flex:1 1 220px;min-width:180px;background:#080e19;color:var(--text);border:1px solid #34425d;border-radius:8px;padding:9px 11px;font:inherit}.diff-search input:focus{outline:2px solid var(--accent);outline-offset:1px}.diff-search mark.diff-search-hit{background:#fff07a;color:#182034;border-radius:2px;box-shadow:0 0 9px #ffe45caa}.credit-line .credit-name{color:var(--accent);font-weight:750;letter-spacing:.02em;text-shadow:0 0 12px #7c9cff66}
+.hold-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:100000;pointer-events:none;background:transparent}
+.hold-progress-bar{height:100%;width:100%;transform-origin:left center;transform:scaleX(0);background:linear-gradient(90deg,var(--accent),#a8c0ff);box-shadow:0 0 12px #7c9cffaa}
+.hold-progress.running .hold-progress-bar{transition:transform 3s linear;transform:scaleX(1)}
+.hold-progress.resetting .hold-progress-bar{transition:none;transform:scaleX(0)}
+.multi-pair .heads{position:relative;padding-right:104px}
+.multi-pair .pair-actions{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;gap:6px}
+.multi-pair .pair-actions .btn{padding:4px 8px;line-height:1.2}
+.multi-pair .pair-actions .pair-close{color:var(--red)}
+</style>
+</head>
+<body>
+<div id="holdProgress" class="hold-progress" hidden aria-hidden="true"><div class="hold-progress-bar"></div></div>
+<div class="invocation" aria-label="Opening invocation">
+  <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span><span class="spark s5"></span>
+  <div class="invocation-ar" lang="ar" dir="rtl">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ ✧ بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+  <div class="invocation-en">Aʿūdhu billāhi min ash-shayṭān ir-rajīm · Bismillāh ir-Raḥmān ir-Raḥīm</div>
+</div>
+<header>
+  <div class="topbar">
+    <div class="brand" role="button" tabindex="0" aria-label="FaHaM Brand">
+      <img class="brand-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAEsCAYAAACG+vy+AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAP+lSURBVHhehP1n0C7JdaCJPVm+Xv/Za/v2be/hTcMSAEFySIJmSAK7NDOK1YZitbNarSZWsREK/YF+SCH9UISk3VnN7s7uKkgO3QyHBD0JggAJ02ig0Y1G29v2eve515ev1I+TWVXf7R4p763vrcrKSntcnjx5Uv32H/8ftRcFONoDFBqNBhQKpZCgoLnVoJs4GwsSq+RLBcpRKMek0YDWaAVKKZQ2GSpwFICDo+RB8tTya9KglXynAGXTYJ5B4Uj+UjNTd2US2Lqbupo6yI2WindPkMrTVKQLatKrBZVpZKYxlaoBlO51m5a3lW9+s/a6+Ww+60VbbtxXfK8l24sre1lG1FqpZ2226f3u0+p7e1fVfb226u7Vpbt3f+O01f7T9O0723WvfbZ2343qtv2019jLq2V7W31tfu7Vpbt3f+t2+bZ2n6f23Zbf3u0+p7bfe29fW+vfa/W9r66f23t83v/t67b9rfbt1fb1W/3u36f7t32v3u1u32v7vX3VfV/Wvd/f63V/v3tfXvt3bf3v/2+/8X0D8fN4JzBvV1gAAAABJRU5ErkJggg==" alt="FaHaM Logo">
+      <div class="brand-copy">
+        <h1>FaHaM</h1>
+        <p class="sub">Compare two text files side by side. Differences are highlighted as you load them.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<dialog class="setup-dialog" id="setupDialog" aria-labelledby="setupTitle">
+  <div class="setup-head">
+    <h2 id="setupTitle">App setup</h2>
+    <button class="btn" id="closeSetup" type="button" aria-label="Close setup">✕</button>
+  </div>
+  <div class="setup-body">
+    <label class="setup-check"><input id="showBanner" type="checkbox"> Show invocation banner</label>
+    <section class="activation-box" aria-labelledby="activationHeading">
+      <h3 id="activationHeading">Offline app license</h3>
+      <p class="setup-note">This standalone app verifies a digitally signed license locally. No activation server is required.</p>
+      <div class="activation-meta" id="deviceIdentity">Installation code: waiting…</div>
+      <div class="activation-key" id="activationKey" aria-live="polite">No offline license saved.</div>
+      <div class="activation-meta" id="activationMeta">License product: FaHaM</div>
+      <div class="activation-actions">
+        <button class="btn" id="copySetupDevice" type="button">Copy installation code</button>
+        <button class="btn" id="checkActivation" type="button">Check license</button>
+      </div>
+    </section>
+    <div class="setup-field"><label for="bannerArabic">Banner message</label><textarea id="bannerArabic" dir="auto" spellcheck="false"></textarea></div>
+    <div class="setup-field"><label for="bannerTranslation">Second line / transliteration</label><input id="bannerTranslation" type="text" dir="auto"></div>
+    <div class="setup-row">
+      <label class="setup-field" for="bannerBg">Banner background color<input id="bannerBg" type="color"></label>
+      <label class="setup-field" for="bannerFg">Banner font color<input id="bannerFg" type="color"></label>
+    </div>
+    <div class="setup-field"><label for="appBg">App background color<input id="appBg" type="color"></label></div>
+    <h3 class="setup-section-title">Compare colors</h3>
+    <div class="setup-row">
+      <label class="setup-field" for="fileAColor">File A label<input id="fileAColor" type="color"></label>
+      <label class="setup-field" for="fileBColor">File B label<input id="fileBColor" type="color"></label>
+    </div>
+    <div class="setup-row">
+      <label class="setup-field" for="paneBg">Text area background<input id="paneBg" type="color"></label>
+      <label class="setup-field" for="paneFg">Text area font<input id="paneFg" type="color"></label>
+    </div>
+    <div class="setup-row">
+      <label class="setup-field" for="selectBg">Selection panel background<input id="selectBg" type="color"></label>
+      <label class="setup-field" for="selectFg">Selection panel font<input id="selectFg" type="color"></label>
+    </div>
+    <label class="setup-check"><input id="showLogo" type="checkbox"> Show U1V1 logo</label>
+    <div class="setup-field">
+      <label for="logoUpload">Choose a replacement logo</label>
+      <input id="logoUpload" type="file" accept="image/*">
+    </div>
+  </div>
+  <div class="setup-actions">
+    <button class="btn" id="resetSetup" type="button">Reset defaults</button>
+    <div>
+      <button class="btn" id="cancelSetup" type="button">Close</button>
+      <button class="btn primary" id="saveSetup" type="button">Save setup</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="activation-gate" id="activationGate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+  <div class="activation-card">
+    <div class="gate-brand">FaHaM</div>
+    <h2 id="gateTitle">Activate this app</h2>
+    <p>Copy this installation code and send it to your administrator. They can issue a signed license using the offline license tool.</p>
+    <label>Installation code</label>
+    <div class="device-code" id="deviceCode" aria-live="polite">Preparing code…</div>
+    <button class="btn" id="copyDevice" type="button">Copy installation code</button>
+    <label for="licenseKey">Offline license key</label>
+    <textarea id="licenseKey" autocomplete="off" spellcheck="false" placeholder="Paste the signed license key here"></textarea>
+    <button class="btn primary" id="submitActivation" type="button">Activate</button>
+    <div class="gate-status" id="gateStatus" role="status"></div>
+    <div class="gate-foot">App ID FaHaM · Offline signature verification</div>
+  </div>
+</div>
+
+<main class="wrap">
+    <section class="toolbar" id="dropzone">
+    <div class="pick"><label for="leftFile">File A</label><input class="file" id="leftFile" type="file"><button class="btn" id="leftClearBtn" type="button" aria-label="Clear File A" hidden>×</button></div>
+    <div class="pick"><label for="rightFile">File B</label><input class="file" id="rightFile" type="file"><button class="btn" id="rightClearBtn" type="button" aria-label="Clear File B" hidden>×</button></div>
+    <div class="pick"><label for="moreFiles">Additional files</label><input class="file" id="moreFiles" type="file" multiple aria-label="Choose additional files"><button class="btn" id="moreClearBtn" type="button" aria-label="Clear additional files" hidden>×</button></div>
+    <div class="pick"><label for="allFiles">Multi-select files</label><input class="file" id="allFiles" type="file" multiple aria-label="Select files together"><button class="btn" id="allClearBtn" type="button" aria-label="Clear multi-selected files" hidden>×</button></div>
+    <div class="pick"><label for="folderFiles">Choose folder</label><input class="file" id="folderFiles" type="file" webkitdirectory directory multiple aria-label="Choose folder to compare"><button class="btn" id="folderClearBtn" type="button" aria-label="Clear folder files" hidden>×</button></div>
+    <label class="mode" for="viewMode">View as<select id="viewMode"><option value="text">Text</option><option value="hex">Entire file (hex)</option></select></label>
+    <button class="btn primary" id="compare">Compare files</button>
+    <button class="btn" id="swapFiles" type="button" title="Swap File A and File B">⇄</button>
+    <button class="btn" id="clear">Clear</button>
+    <span class="status" id="status">Choose files together, or select File A and at least one comparison file.</span>
+  </section>
+  <div class="summary" id="summary" hidden>
+    <span id="counts"></span>
+    <div class="legend"><span class="key"><i class="dot a"></i>Added</span><span class="key"><i class="dot d"></i>Removed</span><span class="key"><i class="dot c"></i>Changed</span></div>
+  </div>
+  <div class="diff-search" id="diffSearch" hidden>
+    <label for="diffSearchInput">Find in differences</label>
+    <input id="diffSearchInput" type="search" placeholder="Search words or phrases..." autocomplete="off">
+    <button class="btn" id="diffSearchClear" type="button">Clear search</button>
+    <button class="btn primary" id="exportExcel" type="button" disabled>Export Excel</button>
+    <span id="diffSearchCount" aria-live="polite">Search filters difference rows by text.</span>
+  </div>
+    <section class="diff" id="diff">
+    <div class="heads" style="display:grid; grid-template-columns:1fr 1fr;">
+      <div class="head" id="leftHeadContainer" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 14px;">
+        <span id="leftName" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">File A</span>
+        <div style="display:flex; gap:6px; align-items:center; flex:none;">
+          <input type="file" id="headerLeftFile" style="display:none;">
+          <button type="button" class="btn" id="headerSelectA" style="padding:4px 10px; font-size:11.5px; background:#202d46; color:var(--text); border:1px solid #34425d; border-radius:6px; cursor:pointer; line-height:1.2;">Select</button>
+          <button type="button" class="btn" id="headerClearA" title="Close / Remove file" style="padding:4px 8px; font-size:11.5px; background:transparent; border:1px solid #34425d; color:var(--red); border-radius:6px; cursor:pointer; display:none; line-height:1.2;">✕</button>
+        </div>
+      </div>
+      <div class="head" id="rightHeadContainer" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 14px; border-left:1px solid var(--line);">
+        <span id="rightName" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">File B</span>
+        <div style="display:flex; gap:6px; align-items:center; flex:none;">
+          <input type="file" id="headerRightFile" style="display:none;">
+          <button type="button" class="btn" id="headerSelectB" style="padding:4px 10px; font-size:11.5px; background:#202d46; color:var(--text); border:1px solid #34425d; border-radius:6px; cursor:pointer; line-height:1.2;">Select</button>
+          <button type="button" class="btn" id="headerClearB" title="Close / Remove file" style="padding:4px 8px; font-size:11.5px; background:transparent; border:1px solid #34425d; color:var(--red); border-radius:6px; cursor:pointer; display:none; line-height:1.2;">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="empty" id="empty"><strong>Your comparison will appear here</strong>Select File A and File B, then add any other files you want to compare with File A.</div>
+    <div class="rows" id="rows" hidden></div>
+  </section>
+  <div id="multiResults" class="multi-results" hidden></div>
+  <p class="foot">Files are read locally in your browser and are not uploaded.</p>
+  <p class="foot credit-line" id="preparedBy" style="margin-top:6px;opacity:.9"></p>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);let files=[null,null];let lastBase=null,lastTargets=[];
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function splitLines(s){return s.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')}
+function hexLines(buffer){const bytes=new Uint8Array(buffer),lines=[];for(let i=0;i<bytes.length;i+=16){const chunk=bytes.subarray(i,i+16),hex=Array.from(chunk,b=>b.toString(16).padStart(2,"0")).join(" ").padEnd(47," "),ascii=Array.from(chunk,b=>b>=32&&b<=126?String.fromCharCode(b):".").join("");lines.push(i.toString(16).padStart(8,"0")+"  "+hex+"  |"+ascii+"|")}return lines.length?lines:["00000000  <empty file>"]}
+function diffOps(a,b){const n=a.length,m=b.length,max=n+m,off=max+1,v=new Int32Array(2*max+3);v.fill(-1);v[off+1]=0;const trace=[];let done=false;
+ for(let d=0;d<=max&&!done;d++){trace.push(v.slice());for(let k=-d;k<=d;k+=2){const idx=off+k;let x;if(k===-d||(k!==d&&v[idx-1]<v[idx+1]))x=v[idx+1];else x=v[idx-1]+1;let y=x-k;while(x<n&&y<m&&a[x]===b[y]){x++;y++}v[idx]=x;if(x>=n&&y>=m){trace.push(v.slice());done=true;break}}}
+ let x=n,y=m,ops=[];for(let d=trace.length-1;d>0;d--){const prev=trace[d-1],k=x-y;let pk;if(k===-d||(k!==d&&prev[off+k-1]<prev[off+k+1]))pk=k+1;else pk=k-1;const px=prev[off+pk],py=px-pk;while(x>px&&y>py){ops.push({t:'=',a:a[x-1],b:b[y-1]});x--;y--}if(d<=max){if(x===px){ops.push({t:'+',b:b[y-1]});y--}else{ops.push({t:'-',a:a[x-1]});x--}}}while(x>0&&y>0){ops.push({t:'=',a:a[--x],b:b[--y]})}while(x>0)ops.push({t:'-',a:a[--x]});while(y>0)ops.push({t:'+',b:b[--y]});return ops.reverse()}
+function syncPaneScroll(){const host=$("rows");host.querySelectorAll(".row").forEach(row=>{const panes=row.querySelectorAll(".code");if(panes.length!==2)return;let syncing=false;panes.forEach((pane,index)=>pane.addEventListener("scroll",()=>{if(syncing)return;const peer=panes[1-index];const sourceMax=Math.max(0,pane.scrollWidth-pane.clientWidth);const targetMax=Math.max(0,peer.scrollWidth-peer.clientWidth);const fraction=sourceMax?pane.scrollLeft/sourceMax:0;syncing=true;peer.scrollLeft=fraction*targetMax;syncing=false},{passive:true}))})}
+function align(ops){let out=[];for(let i=0;i<ops.length;){if(ops[i].t==='='){out.push({kind:'same',l:ops[i].a,r:ops[i].b});i++;continue}let dels=[],adds=[];while(i<ops.length&&ops[i].t!=='='){if(ops[i].t==='-')dels.push(ops[i++]);else adds.push(ops[i++])}const pairs=Math.max(dels.length,adds.length);for(let j=0;j<pairs;j++){const d=dels[j],a=adds[j];out.push({kind:d&&a?'change':d?'del':'add',l:d?.a,r:a?.b})}}return out}
+function render(a,b){const rows=align(diffOps(a,b));let ln=0,rn=0,added=0,removed=0,changed=0;const markup=rows.map(row=>{const lnum=row.l!==undefined?++ln:"",rnum=row.r!==undefined?++rn:"";if(row.kind==="add")added++;if(row.kind==="del")removed++;if(row.kind==="change")changed++;return `<div class="row ${row.kind}" data-kind="${row.kind}"><div class="cell"><span class="ln">${lnum}</span><span class="code">${row.l===undefined?"":esc(row.l)}</span></div><div class="cell"><span class="ln">${rnum}</span><span class="code">${row.r===undefined?"":esc(row.r)}</span></div></div>`}).join("");$("rows").innerHTML=markup;syncPaneScroll();$("rows").hidden=false;$("empty").hidden=true;$("summary").hidden=false;$("counts").innerHTML=`<button type="button" class="pill add" data-filter="add" aria-pressed="false">+${added} added</button> <button type="button" class="pill del" data-filter="del" aria-pressed="false">−${removed} removed</button> <button type="button" class="pill" style="background:#473a1f;color:#ffe08b" data-filter="change" aria-pressed="false">${changed} changed</button>`;$("counts").querySelectorAll("[data-filter]").forEach(button=>button.addEventListener("click",()=>{const current=button.getAttribute("aria-pressed")==="true";$("counts").querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed","false"));const filter=current?"all":button.dataset.filter;if(!current)button.setAttribute("aria-pressed","true");$("rows").querySelectorAll(".row").forEach(row=>row.hidden=filter!=="all"&&row.dataset.kind!==filter);$("status").textContent=filter==="all"?"Showing all comparison rows.":`Showing ${button.textContent.trim()} rows.`}));$("status").textContent=rows.every(r=>r.kind==="same")?"Files are identical.":"Comparison complete. Click a count to filter rows."}
+async function compare(){const l=$("leftFile").files[0],r=$("rightFile").files[0];if(!l||!r){$("status").textContent="Choose both files first.";return}if(l.size+r.size>80*1024*1024){$("status").textContent="Files are over the 80 MB browser limit.";return}const mode=$("viewMode").value;$("status").textContent=mode==="hex"?"Reading every byte…":"Reading text…";try{const [a,b]=mode==="hex"?await Promise.all([l.arrayBuffer(),r.arrayBuffer()]):await Promise.all([l.text(),r.text()]);$("leftName").textContent=l.name+(mode==="hex"?" · full file":"");$("rightName").textContent=r.name+(mode==="hex"?" · full file":"");$("status").textContent="Comparing…";setTimeout(()=>render(mode==="hex"?hexLines(a):splitLines(a),mode==="hex"?hexLines(b):splitLines(b)),0)}catch(e){$("status").textContent="Could not read one of the files."}}
+$('compare').onclick=compare;
+$('leftFile').onchange = e => {
+  files[0] = e.target.files[0];
+  if ($('leftFile').files[0] && $('rightFile').files[0]) {
+    compare();
+  }
+};
+$('rightFile').onchange = e => {
+  files[1] = e.target.files[0];
+  if ($('leftFile').files[0] && $('rightFile').files[0]) {
+    compare();
+  }
+};$('clear').onclick=()=>{$('leftFile').value='';$('rightFile').value='';$('rows').hidden=true;$('rows').innerHTML='';$('empty').hidden=false;$('summary').hidden=true;$('leftName').textContent='File A';$('rightName').textContent='File B';$('status').textContent='Choose files together, or select File A and at least one comparison file.'};
+const dz=$('dropzone');dz.ondragover=e=>{e.preventDefault();dz.classList.add('drop')};dz.ondragleave=()=>dz.classList.remove('drop');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('drop');if(e.dataTransfer.files.length>=2){$('leftFile').files=e.dataTransfer.files;const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[1]);$('rightFile').files=dt.files;compare()}};
+
+/* Global Screen-Wide Hold Listener for Setup / Settings */
+(()=>{
+  const banner=document.querySelector(".invocation"),message=$("bannerArabic"),translation=$("bannerTranslation"),logo=document.querySelector(".brand-mark"),originalLogo=logo.src,key="fahamCompFilesSetup",defaults={showBanner:true,showLogo:true,message:"أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ ✧ بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",translation:"Aʿūdhu billāhi min ash-shayṭān ir-rajīm · Bismillāh ir-Raḥmān ir-Raḥīm",bg:"#172231",fg:"#f2dda0",appBg:"#0b1020",fileA:"#b9d2ff",fileB:"#9fe3cb",paneBg:"#0d1423",paneFg:"#d9e3f1",selectBg:"#202d46",selectFg:"#e7eef9",logo:originalLogo};let pendingLogo=null;
+  function read(){try{return{...defaults,...JSON.parse(localStorage.getItem(key)||"{}")}}catch{return{...defaults}}}
+  function apply(s){document.documentElement.style.setProperty("--app-bg",s.appBg);document.documentElement.style.setProperty("--file-a-color",s.fileA);document.documentElement.style.setProperty("--file-b-color",s.fileB);document.documentElement.style.setProperty("--pane-bg",s.paneBg);document.documentElement.style.setProperty("--pane-fg",s.paneFg);document.documentElement.style.setProperty("--selection-bg",s.selectBg);document.documentElement.style.setProperty("--selection-fg",s.selectFg);banner.hidden=!s.showBanner;logo.hidden=!s.showLogo;message.textContent=s.message;translation.textContent=s.translation;banner.style.backgroundImage="none";banner.style.backgroundColor=s.bg;message.style.color=s.fg;translation.style.color=s.fg}
+  function fill(){const s=read();$("showBanner").checked=s.showBanner;$("showLogo").checked=s.showLogo;message.value=s.message;translation.value=s.translation;$("bannerBg").value=s.bg;$("bannerFg").value=s.fg;$("appBg").value=s.appBg;$("fileAColor").value=s.fileA;$("fileBColor").value=s.fileB;$("paneBg").value=s.paneBg;$("paneFg").value=s.paneFg;$("selectBg").value=s.selectBg;$("selectFg").value=s.selectFg;pendingLogo=s.logo}
+  function openSetup(){fill();$("setupDialog").showModal();document.dispatchEvent(new Event("setupOpened"))}
+
+  let holdTimer=0;const holdBar=$("holdProgress");
+  function resetHoldBar(){if(!holdBar)return;holdBar.classList.remove("running");holdBar.classList.add("resetting");holdBar.hidden=true;holdBar.setAttribute("aria-hidden","true");requestAnimationFrame(()=>holdBar.classList.remove("resetting"))}
+  function startHoldBar(){if(!holdBar)return;holdBar.classList.remove("running","resetting");holdBar.hidden=false;holdBar.setAttribute("aria-hidden","false");void holdBar.offsetWidth;holdBar.classList.add("running")}
+  function cancelHold(){clearTimeout(holdTimer);holdTimer=0;resetHoldBar()}
+
+  // Attach global pointer event listeners across the entire screen window / body
+  window.addEventListener("pointerdown", event => {
+    // If user interacts inside modals or dialogs or activation gate, allow normal interaction without triggering background hold unless intended, but requirement states entire screen. We ignore interactive buttons/inputs/dialogs to prevent accidental triggers while typing or clicking buttons.
+    if(event.target.closest("button, input, select, textarea, dialog, a")) return;
+    cancelHold();
+    startHoldBar();
+    holdTimer=setTimeout(()=>{holdTimer=0;resetHoldBar();openSetup()},3000);
+  });
+  ["pointerup","pointerleave","pointercancel","mouseup","touchend"].forEach(type=>window.addEventListener(type,cancelHold));
+  window.addEventListener("contextmenu", event => {
+    if(!event.target.closest("button, input, select, textarea, dialog, a")) {
+      event.preventDefault();
+    }
+  });
+
+  $("closeSetup").addEventListener("click",()=>$("setupDialog").close());
+  $("cancelSetup").addEventListener("click",()=>$("setupDialog").close());
+  $("saveSetup").addEventListener("click",()=>{const s={showBanner:$("showBanner").checked,showLogo:$("showLogo").checked,message:message.value,translation:translation.value,bg:$("bannerBg").value,fg:$("bannerFg").value,appBg:$("appBg").value,fileA:$("fileAColor").value,fileB:$("fileBColor").value,paneBg:$("paneBg").value,paneFg:$("paneFg").value,selectBg:$("selectBg").value,selectFg:$("selectFg").value,logo:pendingLogo||originalLogo};try{localStorage.setItem(key,JSON.stringify(s));logo.src=s.logo;apply(s);$("setupDialog").close()}catch{$("setupDialog").close();alert("Could not save these settings in this browser.")}});
+  $("logoUpload").addEventListener("change",event=>{const file=event.target.files[0];if(!file)return;if(file.size>1500000){alert("Choose a logo image smaller than 1.5 MB.");event.target.value="";return}const reader=new FileReader();reader.onload=()=>{pendingLogo=reader.result};reader.readAsDataURL(file)});
+  $("resetSetup").addEventListener("click",()=>{try{localStorage.removeItem(key)}catch{}logo.src=originalLogo;pendingLogo=originalLogo;apply(defaults);fill()});
+  try{const s=read();logo.src=s.logo;apply(s)}catch{apply(defaults)}
+})();
+
+/* Offline License & Verification */
+(()=>{const appId="FAHAM-COMPFILES",deviceKey="fahamCompFilesDeviceId",licenseStorageKey="fahamCompFilesOfflineLicense",publicKeyBytes="MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpgYl9tHkWRCbKh6gmQfNdAeOcJ/johQ+/ZtXIP4Z3aVnhIEetSOQMgOgEbEhTaux50Maaxkesk3X4XkmtM8TRA==";function randomHex(size){const b=new Uint8Array(size);crypto.getRandomValues(b);return Array.from(b,x=>x.toString(16).padStart(2,"0")).join("").toUpperCase()}function deviceId(){let id=localStorage.getItem(deviceKey);if(!/^[A-F0-9]{32}$/.test(id||"")){id=randomHex(16);localStorage.setItem(deviceKey,id)}return id}function setStatus(text){$("gateStatus").textContent=text}function showGate(show){$("activationGate").hidden=!show;if(show)setTimeout(()=>$("licenseKey").focus(),0)}function decode64url(value){const normalized=value.replace(/-/g,"+").replace(/_/g,"/");const binary=atob(normalized+"=".repeat((4-normalized.length%4)%4));return Uint8Array.from(binary,ch=>ch.charCodeAt(0))}let importedKey;async function verifyToken(token){const pieces=token.trim().split(".");if(pieces.length!==2)throw Error("License format is not valid.");let payload;try{payload=JSON.parse(new TextDecoder().decode(decode64url(pieces[0])))}catch{throw Error("License contents could not be read.")}if(payload.appId!==appId)throw Error("This license is for a different app.");if(payload.deviceId!==deviceId())throw Error("This license belongs to a different installation code.");if(!Number.isFinite(payload.expiresAt)||payload.expiresAt<=Date.now())throw Error("This license has expired.");if(!importedKey)importedKey=crypto.subtle.importKey("spki",decode64url(publicKeyBytes),{name:"ECDSA",namedCurve:"P-256"},false,["verify"]);const key=await importedKey;const valid=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},key,decode64url(pieces[1]),new TextEncoder().encode(pieces[0]));if(!valid)throw Error("License signature is not valid.");return payload}async function checkSaved(){const id=deviceId();$("deviceIdentity").textContent="Installation code: "+id;$("deviceCode").textContent=id;const token=localStorage.getItem(licenseStorageKey);if(!token){$("activationKey").textContent="No offline license saved.";setStatus("Enter the signed license from your administrator.");showGate(true);return false}try{const p=await verifyToken(token);$("activationKey").textContent="Offline license is valid";$("activationMeta").textContent="License "+p.licenseId+" · Expires "+new Date(p.expiresAt).toLocaleDateString();setStatus("License verified on this device.");showGate(false);return true}catch(e){$("activationKey").textContent="License needs attention";$("activationMeta").textContent=e.message;setStatus(e.message);showGate(true);return false}}async function refreshSetup(){const id=deviceId();$("deviceIdentity").textContent="Installation code: "+id;const token=localStorage.getItem(licenseStorageKey);if(!token){$("activationKey").textContent="No offline license saved.";$("activationMeta").textContent="App ID: "+appId;return}try{const p=await verifyToken(token);$("activationKey").textContent="Offline license is valid";$("activationMeta").textContent="License "+p.licenseId+" · Expires "+new Date(p.expiresAt).toLocaleDateString()}catch(e){$("activationKey").textContent="License needs attention";$("activationMeta").textContent=e.message}}async function activate(){const button=$("submitActivation");button.disabled=true;setStatus("Checking the offline signature…");try{const token=$("licenseKey").value.trim();const p=await verifyToken(token);localStorage.setItem(licenseStorageKey,token);$("licenseKey").value="";$("activationMeta").textContent="License "+p.licenseId+" · Expires "+new Date(p.expiresAt).toLocaleDateString();$("activationKey").textContent="Offline license is valid";setStatus("Activation successful.");showGate(false)}catch(e){setStatus(e.message)}finally{button.disabled=false}}async function copyDevice(){const id=deviceId();try{await navigator.clipboard.writeText(id);setStatus("Installation code copied.")}catch{setStatus("Copy failed.")}}$("submitActivation").addEventListener("click",activate);$("licenseKey").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();activate()}});$("copyDevice").addEventListener("click",copyDevice);$("copySetupDevice").addEventListener("click",copyDevice);$("checkActivation").addEventListener("click",refreshSetup);document.addEventListener("setupOpened",refreshSetup);checkSaved()})();
+
+function renderExtraPair(a,b,leftName,rightName){const host=document.createElement("section");host.className="multi-pair";host.innerHTML='<div class="heads"><div class="head"></div><div class="head"></div><div class="pair-actions"><button type="button" class="btn pair-swap" title="Swap these two files" aria-label="Swap these two files">⇄</button><button type="button" class="btn pair-close" title="Close this comparison" aria-label="Close this comparison">×</button></div></div><div class="pair-summary"><strong>Changes</strong><div class="pair-counts"></div></div><div class="rows"></div>';let leftLines=a,rightLines=b,leftTitle=leftName,rightTitle=rightName;const heads=host.querySelectorAll(".head"),rowsHost=host.querySelector(".rows"),counts=host.querySelector(".pair-counts");function paint(){heads[0].textContent=leftTitle;heads[1].textContent=rightTitle;const rows=align(diffOps(leftLines,rightLines));let ln=0,rn=0,added=0,removed=0,changed=0;rowsHost.innerHTML=rows.map(row=>{const lnum=row.l!==undefined?++ln:"",rnum=row.r!==undefined?++rn:"";if(row.kind==="add")added++;if(row.kind==="del")removed++;if(row.kind==="change")changed++;return '<div class="row '+row.kind+'" data-kind="'+row.kind+'"><div class="cell"><span class="ln">'+lnum+'</span><span class="code">'+(row.l===undefined?"":esc(row.l))+'</span></div><div class="cell"><span class="ln">'+rnum+'</span><span class="code">'+(row.r===undefined?"":esc(row.r))+'</span></div></div>'}).join("");counts.innerHTML='<button type="button" class="pill add" data-filter="add" aria-pressed="false">+'+added+' added</button><button type="button" class="pill del" data-filter="del" aria-pressed="false">-'+removed+' removed</button><button type="button" class="pill" style="background:#473a1f;color:#ffe08b" data-filter="change" aria-pressed="false">'+changed+' changed</button>';counts.querySelectorAll("[data-filter]").forEach(button=>button.addEventListener("click",()=>{const active=button.getAttribute("aria-pressed")==="true";counts.querySelectorAll("[data-filter]").forEach(item=>item.setAttribute("aria-pressed","false"));const filter=active?"all":button.dataset.filter;if(!active)button.setAttribute("aria-pressed","true");host.querySelectorAll(".row").forEach(row=>row.hidden=filter!=="all"&&row.dataset.kind!==filter);if(typeof applyDiffSearch==="function")applyDiffSearch()}));host.querySelectorAll(".row").forEach(row=>{const panes=row.querySelectorAll(".code");let lock=false;panes.forEach((pane,i)=>pane.addEventListener("scroll",()=>{if(lock)return;const peer=panes[1-i],max=pane.scrollWidth-pane.clientWidth;lock=true;peer.scrollLeft=max?pane.scrollLeft/max*(peer.scrollWidth-peer.clientWidth):0;lock=false},{passive:true}))})}host.querySelector(".pair-swap").addEventListener("click",()=>{[leftLines,rightLines]=[rightLines,leftLines];[leftTitle,rightTitle]=[rightTitle,leftTitle];paint();if(typeof applyDiffSearch==="function")applyDiffSearch()});host.querySelector(".pair-close").addEventListener("click",()=>{host.remove();if(typeof applyDiffSearch==="function")applyDiffSearch();if(!$("multiResults").querySelector(".multi-pair")){$("multiResults").hidden=true;$("diff").hidden=false;$("empty").hidden=false;$("rows").hidden=true;$("summary").hidden=true;$("diffSearch").hidden=true;$("status").textContent="All comparison panels closed."}else{$("status").textContent="Comparison panel closed."}});paint();return host}
+
+async function compareMultiple(){const folderSelection=Array.from($("folderFiles").files||[]),allSelection=Array.from($("allFiles").files||[]),selected=folderSelection.length?folderSelection:allSelection,manualBase=$("leftFile").files[0],more=Array.from($("moreFiles").files||[]),base=selected[0]||manualBase||more[0],targetFiles=selected.length?selected.slice(1):manualBase?[$("rightFile").files[0],...more]:more.slice(1);const targets=targetFiles.filter(Boolean).filter((f,i,all)=>all.findIndex(x=>x.name===f.name&&x.size===f.size&&x.lastModified===f.lastModified)===i);if(!base||!targets.length){$("status").textContent="Choose at least two files, or select File A and one comparison file.";return}if(targets.some(f=>base.size+f.size>80*1024*1024)){$("status").textContent="A comparison pair exceeds the 80 MB browser limit.";return}lastBase=base;lastTargets=targets;const mode=$("viewMode").value;try{$("status").textContent="Reading files...";$("multiResults").innerHTML="";const leftRaw=mode==="hex"?await base.arrayBuffer():await base.text(),left=mode==="hex"?hexLines(leftRaw):splitLines(leftRaw);if(targets.length===1){$("multiResults").hidden=true;$("diff").hidden=false;const raw=mode==="hex"?await targets[0].arrayBuffer():await targets[0].text();$("leftName").textContent=base.webkitRelativePath||base.name;$("rightName").textContent=targets[0].webkitRelativePath||targets[0].name;render(left,mode==="hex"?hexLines(raw):splitLines(raw));$("diffSearch").hidden=false;applyDiffSearch();return}$("diff").hidden=true;$("summary").hidden=true;$("multiResults").hidden=false;for(const file of targets){const raw=mode==="hex"?await file.arrayBuffer():await file.text();$("multiResults").appendChild(renderExtraPair(left,mode==="hex"?hexLines(raw):splitLines(raw),(base.webkitRelativePath||base.name),(file.webkitRelativePath||file.name)))}$("status").textContent="Compared "+targets.length+" files against "+base.name+".";$("diffSearch").hidden=false;applyDiffSearch()}catch(error){$("status").textContent="Could not read or compare the selected files."}}
+$("compare").onclick=compareMultiple;$("clear").onclick=()=> {
+  // Reset all file inputs
+  ['leftFile', 'rightFile', 'moreFiles', 'allFiles', 'folderFiles', 'headerLeftFile', 'headerRightFile'].forEach(id => {
+    if ($(id)) $(id).value = '';
+  });
+  // Reset diff rows and views
+  if ($('rows')) { $('rows').innerHTML = ''; $('rows').hidden = true; }
+  if ($('empty')) $('empty').hidden = false;
+  if ($('summary')) $('summary').hidden = true;
+  if ($('counts')) $('counts').innerHTML = '';
+  if ($('multiResults')) { $('multiResults').innerHTML = ''; $('multiResults').hidden = true; }
+  if ($('diffSearch')) $('diffSearch').hidden = true;
+  if ($('diffSearchInput')) $('diffSearchInput').value = '';
+  
+  // Reset header file names and hide header X buttons
+  if ($('leftName')) $('leftName').textContent = 'File A';
+  if ($('rightName')) $('rightName').textContent = 'File B';
+  if ($('headerClearA')) $('headerClearA').style.display = 'none';
+  if ($('headerClearB')) $('headerClearB').style.display = 'none';
+  
+  // Reset toolbar clear buttons if any
+  ['leftClearBtn', 'rightClearBtn', 'moreClearBtn', 'allClearBtn', 'folderClearBtn'].forEach(id => {
+    if ($(id)) $(id).style.display = 'none';
+  });
+
+  lastBase = null;
+  lastTargets = [];
+  if ($('status')) $('status').textContent = 'All files cleared and released. Choose files together, or select File A and at least one comparison file.';
+};
+
+function applyDiffSearch(){const q=$("diffSearchInput").value.trim().toLocaleLowerCase();let count=0;document.querySelectorAll("#diff .row,.multi-pair .row").forEach(row=>{let hit=!q;row.querySelectorAll(".code").forEach(el=>{const raw=el.dataset.searchRaw===undefined?el.textContent:el.dataset.searchRaw;el.dataset.searchRaw=raw;el.replaceChildren();if(!q){el.textContent=raw;return}let pos=0,at;while((at=raw.toLocaleLowerCase().indexOf(q,pos))>=0){if(at>pos)el.append(document.createTextNode(raw.slice(pos,at)));const mark=document.createElement("mark");mark.className="diff-search-hit";mark.textContent=raw.slice(at,at+q.length);el.append(mark);pos=at+q.length;hit=true}if(pos<raw.length)el.append(document.createTextNode(raw.slice(pos)))});const pair=row.closest(".multi-pair"),buttons=(pair?pair.querySelector(".pair-counts"):$("counts")),active=buttons&&buttons.querySelector('[aria-pressed="true"]'),filter=active?active.dataset.filter:"all";row.hidden=!hit||(filter!=="all"&&filter!==row.dataset.kind);if(hit&&row.dataset.kind!=="same"&&(filter==="all"||filter===row.dataset.kind))count++});$("diffSearchCount").textContent=q?count+" matching difference row"+(count===1?"":"s"):"Search filters rows by text."; $("exportExcel").disabled=count===0}
+$("diffSearchInput").addEventListener("input",applyDiffSearch);$("diffSearchClear").addEventListener("click",()=>{$("diffSearchInput").value="";applyDiffSearch();$("diffSearchInput").focus()});
+$("counts").addEventListener("click",e=>{if(e.target.closest("[data-filter]"))setTimeout(applyDiffSearch,0)});$("multiResults").addEventListener("click",e=>{if(e.target.closest("[data-filter]"))setTimeout(applyDiffSearch,0)});
+
+function xEsc(v){return String(v).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}
+function crc32(a){let c=-1;for(const b of a){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}return(c^-1)>>>0}
+function xlsxBlob(entries){const enc=new TextEncoder(),locals=[],centrals=[];let off=0;const w16=(v,p,n)=>v.setUint16(p,n,true),w32=(v,p,n)=>v.setUint32(p,n>>>0,true);entries.forEach(e=>{const n=enc.encode(e[0]),d=enc.encode(e[1]),c=crc32(d),l=new Uint8Array(30+n.length+d.length),v=new DataView(l.buffer);w32(v,0,0x04034b50);w16(v,4,20);w16(v,6,0);w16(v,8,0);w16(v,10,0);w16(v,12,0);w32(v,14,c);w32(v,18,d.length);w32(v,22,d.length);w16(v,26,n.length);w16(v,28,0);l.set(n,30);l.set(d,30+n.length);locals.push(l);const z=new Uint8Array(46+n.length),q=new DataView(z.buffer);w32(q,0,0x02014b50);w16(q,4,20);w16(q,6,20);w16(q,8,0);w16(q,10,0);w16(q,12,0);w16(q,14,0);w32(q,16,c);w32(q,20,d.length);w32(q,24,d.length);w16(q,28,n.length);w16(q,30,0);w16(q,32,0);w16(q,34,0);w16(q,36,0);w32(q,38,0);w32(q,42,off);z.set(n,46);centrals.push(z);off+=l.length});const size=centrals.reduce((a,b)=>a+b.length,0),end=new Uint8Array(22),v=new DataView(end.buffer);w32(v,0,0x06054b50);w16(v,4,0);w16(v,6,0);w16(v,8,entries.length);w16(v,10,entries.length);w32(v,12,size);w32(v,16,off);w16(v,20,0);return new Blob([...locals,...centrals,end],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
+function exportExcel(){const data=[["Change","File A","Line A","Text in File A","File B","Line B","Text in File B"]];document.querySelectorAll("#diff .row:not([hidden]),.multi-pair .row:not([hidden])").forEach(r=>{if(r.dataset.kind==="same")return;const p=r.closest(".multi-pair"),h=p?p.querySelectorAll(".head"):null,c=r.querySelectorAll(".cell");data.push([r.dataset.kind,p?h[0].textContent:$("leftName").textContent,c[0].querySelector(".ln").textContent,c[0].querySelector(".code").textContent,p?h[1].textContent:$("rightName").textContent,c[1].querySelector(".ln").textContent,c[1].querySelector(".code").textContent])});if(data.length<2)return;const letters=["A","B","C","D","E","F","G"],body=data.map((row,i)=>'<row r="'+(i+1)+'">'+row.map((v,j)=>'<c r="'+letters[j]+(i+1)+'" t="inlineStr"><is><t xml:space="preserve">'+xEsc(v)+'</t></is></c>').join("")+'</row>').join(""),sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetData>'+body+'</sheetData><autoFilter ref="A1:G'+data.length+'"/></worksheet>',book='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Differences" sheetId="1" r:id="rId1"/></sheets></workbook>',rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>',root='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',types='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',blob=xlsxBlob([["[Content_Types].xml",types],["_rels/.rels",root],["xl/workbook.xml",book],["xl/_rels/workbook.xml.rels",rels],["xl/worksheets/sheet1.xml",sheet]]),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="FaHaM_Differences.xlsx";a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+
+function swapFilesAB(){
+  let base = lastBase, target = lastTargets && lastTargets[0];
+  const leftInput=$("leftFile"), rightInput=$("rightFile");
+  if(!base || !target){
+    base = leftInput.files && leftInput.files[0];
+    target = rightInput.files && rightInput.files[0];
+  }
+  if(!base || !target){
+    $("status").textContent="Nothing to swap — choose File A and File B first.";
+    return;
+  }
+  try{
+    const dtL=new DataTransfer(), dtR=new DataTransfer();
+    dtL.items.add(target);
+    dtR.items.add(base);
+    leftInput.files=dtL.files;
+    rightInput.files=dtR.files;
+    $("moreFiles").value="";
+    $("allFiles").value="";
+    $("folderFiles").value="";
+  }catch(e){}
+  lastBase=target;
+  lastTargets=[base];
+  const ln=$("leftName").textContent, rn=$("rightName").textContent;
+  $("leftName").textContent=rn;
+  $("rightName").textContent=ln;
+  $("status").textContent="Swapped File A ↔ File B. Re-comparing…";
+  compareMultiple();
+}
+$("swapFiles").onclick=swapFilesAB;
+$("exportExcel").addEventListener("click",exportExcel);
+
+(()=>{const el=$("preparedBy");if(!el)return;const n=String.fromCharCode(72,97,98,105,98);el.innerHTML="Prepared by <span class='credit-name'>"+n+"</span>, Jazak Allahu Khayran";})();
+
+
+// Header Select & X button integration for File A and File B headers
+function initHeaderPicker(headerFileInputId, selectBtnId, clearBtnId, originalFiletoolbarInputId, headerNameSpanId, defaultTitle) {
+  const fileInput = $(headerFileInputId);
+  const selectBtn = $(selectBtnId);
+  const clearBtn = $(clearBtnId);
+  const toolbarInput = $(originalFiletoolbarInputId);
+  const nameSpan = $(headerNameSpanId);
+
+  if(!fileInput || !selectBtn || !clearBtn || !toolbarInput || !nameSpan) return;
+
+  selectBtn.onclick = (e) => {
+    e.preventDefault();
+    fileInput.click();
+  };
+
+  fileInput.onchange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) {
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      toolbarInput.files = dt.files;
+      toolbarInput.dispatchEvent(new Event('change'));
+
+      nameSpan.textContent = f.name;
+      clearBtn.style.display = 'inline-block';
+
+      if ($('leftFile').files[0] && $('rightFile').files[0]) {
+        if ($('compare')) $('compare').click();
+      }
+    }
+  };
+
+  clearBtn.onclick = (e) => {
+    e.preventDefault();
+    fileInput.value = '';
+    toolbarInput.value = '';
+    toolbarInput.dispatchEvent(new Event('change'));
+    nameSpan.textContent = defaultTitle;
+    clearBtn.style.display = 'none';
+    if ($('status')) $('status').textContent = defaultTitle + ' removed.';
+    if ($('rows')) {
+      $('rows').hidden = true;
+      $('rows').innerHTML = '';
+    }
+    if ($('empty')) $('empty').hidden = false;
+    if ($('summary')) $('summary').hidden = true;
+  };
+}
+
+initHeaderPicker('headerLeftFile', 'headerSelectA', 'headerClearA', 'leftFile', 'leftName', 'File A');
+initHeaderPicker('headerRightFile', 'headerSelectB', 'headerClearB', 'rightFile', 'rightName', 'File B');
+
+// Auto-clear active handles and previous diff results when any file input changes
+document.querySelectorAll('input[type="file"]').forEach(input => {
+  const origOnchange = input.onchange;
+  input.addEventListener('change', (e) => {
+    // Release previous results
+    if ($('rows')) { $('rows').innerHTML = ''; $('rows').hidden = true; }
+    if ($('empty')) $('empty').hidden = false;
+    if ($('summary')) $('summary').hidden = true;
+    if ($('counts')) $('counts').innerHTML = '';
+    if ($('multiResults')) { $('multiResults').innerHTML = ''; $('multiResults').hidden = true; }
+    if ($('diffSearch')) $('diffSearch').hidden = true;
+    if ($('diffSearchInput')) $('diffSearchInput').value = '';
+    
+    lastBase = null;
+    lastTargets = [];
+  });
+});
+
+// Keep every picker on the same comparison and reset path. The earlier bindings
+// are retained for compatibility with the rest of the standalone page.
+let comparisonVersion = 0;
+const comparisonPickers = ["leftFile", "rightFile", "moreFiles", "allFiles", "folderFiles"];
+const pickerControls = {
+  leftFile: "leftClearBtn",
+  rightFile: "rightClearBtn",
+  moreFiles: "moreClearBtn",
+  allFiles: "allClearBtn",
+  folderFiles: "folderClearBtn"
+};
+
+function clearComparisonResults() {
+  comparisonVersion++;
+  $("rows").innerHTML = "";
+  $("rows").hidden = true;
+  $("empty").hidden = false;
+  $("summary").hidden = true;
+  $("counts").innerHTML = "";
+  $("multiResults").innerHTML = "";
+  $("multiResults").hidden = true;
+  $("diff").hidden = false;
+  $("diffSearch").hidden = true;
+  $("diffSearchInput").value = "";
+  $("exportExcel").disabled = true;
+  lastBase = null;
+  lastTargets = [];
+}
+
+function updatePickerButtons() {
+  comparisonPickers.forEach(id => {
+    const clearButton = $(pickerControls[id]);
+    if (clearButton) clearButton.hidden = !$(id).files.length;
+  });
+  $("headerClearA").style.display = $("leftFile").files.length ? "inline-block" : "none";
+  $("headerClearB").style.display = $("rightFile").files.length ? "inline-block" : "none";
+}
+
+async function runComparison() {
+  const folderFiles = Array.from($("folderFiles").files);
+  const allFiles = Array.from($("allFiles").files);
+  const groupedFiles = folderFiles.length ? folderFiles : allFiles;
+  const additional = Array.from($("moreFiles").files);
+  const leftFile = $("leftFile").files[0];
+  const rightFile = $("rightFile").files[0];
+  const base = groupedFiles[0] || leftFile || additional[0];
+  const candidates = groupedFiles.length
+    ? groupedFiles.slice(1)
+    : leftFile
+      ? [rightFile, ...additional]
+      : [rightFile, ...additional.slice(additional.length ? 1 : 0)];
+  const targets = candidates.filter((file, index, list) =>
+    file && list.findIndex(other => other === file) === index
+  );
+
+  if (!base || !targets.length) {
+    $("status").textContent = "Choose at least two files, or select File A and one comparison file.";
+    return;
+  }
+  if (targets.some(file => base.size + file.size > 80 * 1024 * 1024)) {
+    $("status").textContent = "A comparison pair exceeds the 80 MB browser limit.";
+    return;
+  }
+
+  const version = ++comparisonVersion;
+  lastBase = base;
+  lastTargets = targets;
+  const mode = $("viewMode").value;
+  $("status").textContent = mode === "hex" ? "Reading every byte…" : "Reading text…";
+
+  try {
+    const leftRaw = mode === "hex" ? await base.arrayBuffer() : await base.text();
+    const left = mode === "hex" ? hexLines(leftRaw) : splitLines(leftRaw);
+    if (version !== comparisonVersion) return;
+
+    $("leftName").textContent = base.webkitRelativePath || base.name;
+    if (targets.length === 1) {
+      const rightRaw = mode === "hex" ? await targets[0].arrayBuffer() : await targets[0].text();
+      if (version !== comparisonVersion) return;
+      $("rightName").textContent = targets[0].webkitRelativePath || targets[0].name;
+      $("multiResults").innerHTML = "";
+      $("multiResults").hidden = true;
+      $("diff").hidden = false;
+      render(left, mode === "hex" ? hexLines(rightRaw) : splitLines(rightRaw));
+    } else {
+      $("diff").hidden = true;
+      $("summary").hidden = true;
+      $("rows").innerHTML = "";
+      $("multiResults").innerHTML = "";
+      $("multiResults").hidden = false;
+      for (const file of targets) {
+        const raw = mode === "hex" ? await file.arrayBuffer() : await file.text();
+        if (version !== comparisonVersion) return;
+        $("multiResults").appendChild(renderExtraPair(
+          left,
+          mode === "hex" ? hexLines(raw) : splitLines(raw),
+          base.webkitRelativePath || base.name,
+          file.webkitRelativePath || file.name
+        ));
+      }
+      $("rightName").textContent = targets.length + " comparison files";
+    }
+
+    $("diffSearch").hidden = false;
+    applyDiffSearch();
+    $("status").textContent = targets.length === 1
+      ? "Comparison complete. Click a count to filter rows."
+      : "Compared " + targets.length + " files against " + (base.webkitRelativePath || base.name) + ".";
+  } catch (error) {
+    if (version === comparisonVersion) {
+      clearComparisonResults();
+      $("status").textContent = "Could not read or compare the selected files.";
+    }
+  }
+}
+
+function handleComparisonPickerChange(input) {
+  if (input.files.length) {
+    if (input.id === "allFiles") {
+      ["folderFiles", "leftFile", "rightFile", "moreFiles"].forEach(id => { $(id).value = ""; });
+    } else if (input.id === "folderFiles") {
+      ["allFiles", "leftFile", "rightFile", "moreFiles"].forEach(id => { $(id).value = ""; });
+    } else if (["leftFile", "rightFile", "moreFiles"].includes(input.id)) {
+      ["allFiles", "folderFiles"].forEach(id => { $(id).value = ""; });
+    }
+  }
+  clearComparisonResults();
+  updatePickerButtons();
+  const left = $("leftFile").files[0];
+  const right = $("rightFile").files[0];
+  const more = $("moreFiles").files;
+  const grouped = $("folderFiles").files.length || $("allFiles").files.length;
+  const ready = grouped > 1 || (left && (right || more.length)) ||
+    (!left && (right && more.length || more.length > 1));
+  if (ready) {
+    $("status").textContent = "Preparing comparison…";
+    setTimeout(runComparison, 0);
+  } else {
+    $("leftName").textContent = left ? left.name : "File A";
+    $("rightName").textContent = right ? right.name : "File B";
+    $("status").textContent = "Choose at least two files, or select File A and one comparison file.";
+  }
+}
+
+comparisonPickers.forEach(id => {
+  const input = $(id);
+  input.onchange = () => handleComparisonPickerChange(input);
+  const clearButton = $(pickerControls[id]);
+  if (clearButton) clearButton.onclick = () => {
+    input.value = "";
+    handleComparisonPickerChange(input);
+  };
+});
+
+["headerLeftFile", "headerRightFile"].forEach((id, index) => {
+  const headerInput = $(id);
+  const toolbarInput = $(index === 0 ? "leftFile" : "rightFile");
+  headerInput.onchange = () => {
+    if (headerInput.files.length) {
+      const transfer = new DataTransfer();
+      transfer.items.add(headerInput.files[0]);
+      toolbarInput.files = transfer.files;
+    } else {
+      toolbarInput.value = "";
+    }
+    handleComparisonPickerChange(toolbarInput);
+  };
+});
+
+$("headerSelectA").onclick = () => $("headerLeftFile").click();
+$("headerSelectB").onclick = () => $("headerRightFile").click();
+$("headerClearA").onclick = () => {
+  $("headerLeftFile").value = "";
+  $("leftFile").value = "";
+  handleComparisonPickerChange($("leftFile"));
+};
+$("headerClearB").onclick = () => {
+  $("headerRightFile").value = "";
+  $("rightFile").value = "";
+  handleComparisonPickerChange($("rightFile"));
+};
+
+$("compare").onclick = runComparison;
+$("clear").onclick = () => {
+  comparisonPickers.forEach(id => { $(id).value = ""; });
+  $("headerLeftFile").value = "";
+  $("headerRightFile").value = "";
+  clearComparisonResults();
+  updatePickerButtons();
+  $("leftName").textContent = "File A";
+  $("rightName").textContent = "File B";
+  $("status").textContent = "All files cleared. Choose files to compare.";
+};
+
+$("swapFiles").onclick = () => {
+  const base = lastBase || $("leftFile").files[0];
+  const target = lastTargets[0] || $("rightFile").files[0];
+  if (!base || !target) {
+    $("status").textContent = "Nothing to swap — choose File A and a comparison file first.";
+    return;
+  }
+  try {
+    const leftTransfer = new DataTransfer();
+    const rightTransfer = new DataTransfer();
+    leftTransfer.items.add(target);
+    rightTransfer.items.add(base);
+    $("leftFile").files = leftTransfer.files;
+    $("rightFile").files = rightTransfer.files;
+    ["moreFiles", "allFiles", "folderFiles", "headerLeftFile", "headerRightFile"].forEach(id => { $(id).value = ""; });
+    clearComparisonResults();
+    updatePickerButtons();
+    setTimeout(runComparison, 0);
+  } catch (error) {
+    $("status").textContent = "Could not swap the selected files in this browser.";
+  }
+};
+
+</script>
+
+
+
+</body>
+</html>
